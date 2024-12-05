@@ -40,7 +40,7 @@
 
 HX711 scale;
 
-float calibration_factor = -7050; //-7050 worked for my 440lb max scale setup
+float calibration_factor = 468050; //-7050 worked for my 440lb max scale setup
 
 void setup() {
   Serial.begin(9600);
@@ -64,8 +64,8 @@ void loop() {
   scale.set_scale(calibration_factor); //Adjust to this calibration factor
 
   Serial.print("Reading: ");
-  Serial.print(scale.get_units(), 1);
-  Serial.print(" lbs"); //Change this to kg and re-adjust the calibration factor if you follow SI units like a sane person
+  Serial.print(scale.get_units());
+  Serial.print(" kg"); //Change this to kg and re-adjust the calibration factor if you follow SI units like a sane person
   Serial.print(" calibration_factor: ");
   Serial.print(calibration_factor);
   Serial.println();
@@ -74,8 +74,8 @@ void loop() {
   {
     char temp = Serial.read();
     if(temp == '+' || temp == 'a')
-      calibration_factor += 10;
+      calibration_factor += 1000;
     else if(temp == '-' || temp == 'z')
-      calibration_factor -= 10;
+      calibration_factor -= 1000;
   }
 }
