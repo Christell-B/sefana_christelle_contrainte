@@ -37,7 +37,7 @@
 
 #define LOADCELL_DOUT_PIN  13
 #define LOADCELL_SCK_PIN  12
-
+int nombre_essaie = 0;
 HX711 scale;
 
 float calibration_factor = 465050; //-7050 worked for my 440lb max scale setup
@@ -52,12 +52,12 @@ void setup() {
   long zero_factor = scale.read_average(); //Get a baseline reading
   Serial.print("Zero factor: "); //This can be used to remove the need to tare the scale. Useful in permanent scale projects.
   Serial.println(zero_factor);
+  Serial.println("Press n to start aquisiton");
 
 }
 
 void loop() {
 
-  Serial.println("Press n to start aquisiton");
   while (Serial.available() == 0);
 
   scale.set_scale(calibration_factor); //Adjust to this calibration factor
@@ -71,8 +71,9 @@ void loop() {
     char temp = Serial.read();
     if(temp == 'n')
       Serial.println("starting data aquisiton");
+      nombre_essaie += 1;
       for (int iter = 0; iter < 10; iter++) {
-        Serial.print("mesure " + String(iter) + " => ");
+        Serial.print("essaie " + String(nombre_essaie) + " - mesure " + String(iter) + " => ");
         Serial.print(scale.get_units(), 3);
         Serial.print(" kg");
         Serial.println();
