@@ -35,6 +35,13 @@
 
 #include "HX711.h" //This library can be obtained here http://librarymanager/All#Avia_HX711
 
+#include "ArduinoGraphics.h"
+#include "Arduino_LED_Matrix.h"
+
+ArduinoLEDMatrix matrix;
+//include the "animation.h" header file that stores the frames for the animation 
+#include "Arduino_LED_Matrix.h"   //Include the LED_Matrix library
+
 #define LOADCELL_DOUT_PIN  13
 #define LOADCELL_SCK_PIN  12
 int nombre_essaie = 0;
@@ -54,6 +61,14 @@ void setup() {
   Serial.println(zero_factor);
   Serial.println("Press n to start aquisiton");
 
+
+  //load frames from the animation.h file
+  matrix.loadSequence(LEDMATRIX_ANIMATION_TETRIS);
+  // start the matrix
+  matrix.begin();
+  //play the animation on the matrix
+  matrix.play(false);
+
 }
 
 void loop() {
@@ -66,6 +81,8 @@ void loop() {
   while (Serial.available()) Serial.read();
   delay(1000);
 
+
+
   if(Serial.available())
   {
     char temp = Serial.read();
@@ -77,8 +94,17 @@ void loop() {
         Serial.print(scale.get_units(), 3);
         Serial.print(" kg");
         Serial.println();
-        delay(1000);
-    }
+        // Make it scroll!
+        matrix.beginDraw();
+        matrix.stroke(0xFFFFFFFF);
+        matrix.textScrollSpeed(60);
+        matrix.textFont(Font_4x6);
+        matrix.beginText(0, 1, 0xFFFFFF);
+        matrix.println(scale.get_units(), 3);
+        matrix.endText(SCROLL_LEFT);
+      }
   }
+
   
+
 }
