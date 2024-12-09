@@ -9,7 +9,7 @@ class GestionnaireEssaisApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Gestionnaire d'essais")
-        self.root.geometry("600x300")
+        self.root.geometry("650x200")
 
         # Variables pour stocker les valeurs
         self.entry_var = tk.IntVar(value=1)  # Début par défaut à 1 secondes
@@ -27,44 +27,44 @@ class GestionnaireEssaisApp:
 
     def create_widgets(self):
         # Champ pour "Nombre d'essais"
-        label_essais = tk.Label(self.root, text="Nombre d'essais (en secondes) :")
-        label_essais.grid(row=0, column=0, padx=10, pady=10, sticky="e")
+        label_essais = tk.Label(self.root, text="Nombre d'essais :")
+        label_essais.grid(row=0, column=1, padx=0, pady=10, sticky="e")
 
-        self.spinbox = tk.Spinbox(self.root, from_=2, to=999, increment=1, textvariable=self.entry_var,
-                                  width=15, justify="center")  # Taille ajustée
-        self.spinbox.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+        self.spinbox = tk.Spinbox(self.root, from_=1, to=999, increment=1, textvariable=self.entry_var,
+                                   justify="right")  # Taille ajustée
+        self.spinbox.grid(row=0, column=2, padx=0, pady=10, sticky="we")
 
         # Champ pour "Préfixe des noms de fichiers"
         label_prefix = tk.Label(self.root, text="Préfixe des noms des fichiers de données :")
-        label_prefix.grid(row=1, column=0, padx=10, pady=10, sticky="e")
+        label_prefix.grid(row=1, column=1, padx=0, pady=10, sticky="we")
 
-        self.prefix_entry = tk.Entry(self.root, textvariable=self.prefix_var, width=15)
-        self.prefix_entry.grid(row=1, column=1, padx=10, pady=10, sticky="e")
+        self.prefix_entry = tk.Entry(self.root, textvariable=self.prefix_var)
+        self.prefix_entry.grid(row=1, column=2, padx=0, pady=10, sticky="we")
 
         # Champ pour "Répertoire de destination"
         label_dest_dir = tk.Label(self.root, text="Répertoire de destination :")
-        label_dest_dir.grid(row=2, column=0, padx=10, pady=10, sticky="e")
+        label_dest_dir.grid(row=2, column=0, padx=0, pady=10, sticky="we")
 
-        self.dest_dir_entry = tk.Entry(self.root, width=15, state="readonly")  # Taille réduite
-        self.dest_dir_entry.grid(row=2, column=1, padx=10, pady=10, sticky="e")
+        self.dest_dir_entry = tk.Entry(self.root, state="readonly")  # Taille réduite
+        self.dest_dir_entry.grid(row=2, column=1,  padx=0, pady=10, sticky="we")
         self.update_dest_dir_display()  # Mise à jour pour afficher uniquement le nom du répertoire
 
         browse_button = tk.Button(self.root, text="Parcourir", command=self.browse_directory)
-        browse_button.grid(row=3, column=1, padx=10, pady=10, sticky="e")  # Bouton déplacé
+        browse_button.grid(row=2, column=2, padx=0, pady=10, sticky="we")  # Bouton déplacé
 
         # Label pour afficher l'état
-        state_label = tk.Label(self.root, text="État :")
-        state_label.grid(row=4, column=0, padx=10, pady=10, sticky="e")
+        # state_label = tk.Label(self.root, text="État :")
+        # state_label.grid(row=4, column=0, padx=10, pady=10, sticky="e")
 
         self.state_display = tk.Label(self.root, textvariable=self.state_var, fg="blue")
-        self.state_display.grid(row=4, column=1, padx=10, pady=10, sticky="e")
+        self.state_display.grid(row=4, column=0, padx=10, pady=10, sticky="w")
 
         # Boutons Démarrer et Arrêter
         self.start_button = tk.Button(self.root, text="Démarrer", command=self.start_process)
-        self.start_button.grid(row=5, column=1, padx=10, pady=10, sticky="e")
+        self.start_button.grid(row=4, column=1, padx=40, pady=10, sticky="we")
 
         self.stop_button = tk.Button(self.root, text="Arrêter", command=self.stop_process)
-        self.stop_button.grid(row=6, column=1, padx=10, pady=10, sticky="e")
+        self.stop_button.grid(row=4, column=2, padx=0, pady=10, sticky="we")
 
     def browse_directory(self):
         """Ouvrir une boîte de dialogue pour sélectionner un répertoire."""
