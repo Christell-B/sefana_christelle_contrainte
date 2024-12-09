@@ -4,15 +4,19 @@ import threading
 import time
 import os
 from datetime import datetime
+import sys
+sys.path.insert(1, os.getcwd())
+from codegenerique import lancer_essaie, enregistrer_mesures
 
 class GestionnaireEssaisApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Gestionnaire d'essais")
         self.root.geometry("650x200")
+        # self.root.grid_columnconfigure(3, weight=1)
 
         # Variables pour stocker les valeurs
-        self.entry_var = tk.IntVar(value=1)  # Début par défaut à 1 secondes
+        self.entry_var = tk.IntVar(value=1)  # Début par défaut à 1
         self.state_var = tk.StringVar(value="Prêt")  # État initial
         self.prefix_var = tk.StringVar(value="FSR_")  # Préfixe par défaut
         self.dest_dir_var = tk.StringVar(value=os.getcwd())  # Répertoire par défaut
@@ -86,33 +90,36 @@ class GestionnaireEssaisApp:
         if not self.running:  # Éviter de démarrer plusieurs threads
             try:
                 # Récupérer la valeur et vérifier qu'elle est valide
-                delay = self.entry_var.get()
-                if delay <= 1:
+                nombre_essaie = self.entry_var.get()
+                if nombre_essaie < 1:
                     raise ValueError
             except ValueError:
-                messagebox.showerror("Erreur", "Veuillez entrer un nombre valide (> 1).")
+                messagebox.showerror("Erreur", "Veuillez entrer un nombre valide (> 0).")
                 return
 
             self.running = True
             self.current_trial = 0
-            self.total_trials = delay
+            self.total_trials = nombre_essaie
             self.state_var.set("En cours - Essai 0 sur {}".format(self.total_trials))
-            self.thread = threading.Thread(target=self.run_process, args=(delay,))
+            self.thread = threading.Thread(target=self.run_process, args=(nombre_essaie,))
             self.thread.start()
         else:
             messagebox.showinfo("Info", "Le processus est déjà en cours.")
 
-    def run_process(self, delay):
+    def run_process(self, nombre_essaie):
         """Exécuter le processus avec un délai."""
-        for i in range(1, delay + 1):
+        mesures = {}
+        for i in range(1, nombre_essaie + 1):
             if not self.running:
                 self.state_var.set("Interrompu")
                 return
             self.current_trial = i
-            self.state_var.set(f"En cours - Essai {i} sur {delay}")
+            self.state_var.set(f"En cours - Essai {i} sur {nombre_essaie}")
+            print(f"Début essaie {i}")
             time.sleep(1)  # Attendre une seconde
+            mesures[i] = lancer_essaie()
         self.state_var.set("Terminé")
-        self.save_data_file()
+        self.save_data_file(mesures)
         self.running = False
 
     def stop_process(self):
@@ -123,21 +130,15 @@ class GestionnaireEssaisApp:
         else:
             messagebox.showinfo("Info", "Aucun processus en cours.")
 
-    def save_data_file(self):
+    def save_data_file(self, mesures):
         """Sauvegarder automatiquement un fichier avec le préfixe et l'horodatage."""
         prefix = self.prefix_var.get()
         dest_dir = self.dest_dir_var.get()
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{prefix}{timestamp}.txt"
-        filepath = os.path.join(dest_dir, filename)
 
         # Sauvegarder des données fictives dans le fichier
         try:
-            with open(filepath, "w") as file:
-                file.write(f"Fichier généré automatiquement le {timestamp}\n")
-                file.write(f"Préfixe utilisé : {prefix}\n")
-                file.write(f"Nombre total d'essais : {self.total_trials}\n")
-                file.write("Données de l'essai : ...\n")
+            filename = enregistrer_mesures(mesures, dossier = dest_dir, prefix_fichier=prefix)
+            filepath = os.path.join(dest_dir, filename)
             messagebox.showinfo("Fichier sauvegardé", f"Fichier créé : {filepath}")
         except Exception as e:
             messagebox.showerror("Erreur", f"Impossible de sauvegarder le fichier : {e}")
