@@ -5,7 +5,7 @@ import time
 import os 
 
 # Configuration du port série pour Arduino
-arduino_port = "COM3"  # Remplacez par votre port série (exemple : COM3 ou /dev/ttyUSB0)
+arduino_port = "COM6"  # Remplacez par votre port série (exemple : COM3 ou /dev/ttyUSB0)
 baud_rate = 9600       # Assurez-vous que le débit en bauds correspond à celui de l'Arduino
 nb_mesures_max = 10     # Nombre maximum de mesures avant d'enregistrer dans un fichier
 
