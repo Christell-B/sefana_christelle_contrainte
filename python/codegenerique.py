@@ -27,14 +27,14 @@ def envoyer_commande(commande):
 
 # Fonction pour extraire la valeur de mesure depuis une ligne Arduino
 def extraire_mesure(ligne):
-    match = re.search(r"=>\s*([\d.]+)\s*kg", ligne)  # Rechercher la valeur après '=>'
+    match = re.search(r"=>\s*(-*[\d.]+)\s*kg", ligne)  # Rechercher la valeur après '=>'
     if match:
         return float(match.group(1))  # Retourner la valeur en tant que float
     return None
 
 # Fonction pour enregistrer les mesures dans un fichier texte
-def enregistrer_mesures(mesures, prefix_fichier="FSR_"):
-    nom_fichier = f'{prefix_fichier}{datetime.now():%Y%m%d_%H%M%S}.txt'
+def enregistrer_mesures(mesures, dossier = os.getcwd(), prefix_fichier="FSR_"):
+    nom_fichier = f'{dossier}/{prefix_fichier}{datetime.now():%Y%m%d_%H%M%S}.txt'
     with open(nom_fichier, "w") as fichier:
         for essaie in mesures:
             fichier.write(f"Essaie numéro {essaie}\n")
@@ -42,6 +42,31 @@ def enregistrer_mesures(mesures, prefix_fichier="FSR_"):
                 fichier.write(f"Mesure {i} : {mesure} kg\n")
     print(f"Les mesures ont été enregistrées dans le fichier : {nom_fichier}")
     return nom_fichier
+
+
+def lancer_essaie():
+    envoyer_commande('n')  # Envoyer la commande 'n' à l'Arduino
+
+    listemesures = []
+    print("Attente de la mesure...")
+
+    # Lecture de la première mesure
+    while len(listemesures) < nb_mesures_max:
+        if ser.in_waiting > 0:  # Vérifie si des données sont disponibles
+            ligne = ser.readline().decode('utf-8').strip()  # Lire une ligne et la décoder
+            # print(f"Reçu : {ligne}")  # Afficher la ligne brute pour vérification
+            mesure = extraire_mesure(ligne)  # Extraire la mesure
+            if mesure is not None:
+                if mesure != 0:  # Vérification des mesures nulles
+                    listemesures.append(mesure)
+                    print(f"Mesure validée : {mesure} kg")
+                else:
+                    print("Avertissement : Mesure nulle reçue, vérifiez le capteur.")
+            else:
+                print("Erreur : Données reçues non valides.")
+        time.sleep(1)  # Attente entre deux lectures
+    
+    return listemesures
 
 
 # Lancer l'application
@@ -62,27 +87,7 @@ if __name__ == "__main__":
             elif commande.lower() == 'n':  # Collecter une mesure
                 essaie += 1
                 print(f"Début essaie {essaie}")
-                mesures[essaie] = []
-
-                envoyer_commande('n')  # Envoyer la commande 'n' à l'Arduino
-
-                print("Attente de la mesure...")
-
-                # Lecture de la première mesure
-                while len(mesures[essaie]) < nb_mesures_max:
-                    if ser.in_waiting > 0:  # Vérifie si des données sont disponibles
-                        ligne = ser.readline().decode('utf-8').strip()  # Lire une ligne et la décoder
-                        # print(f"Reçu : {ligne}")  # Afficher la ligne brute pour vérification
-                        mesure = extraire_mesure(ligne)  # Extraire la mesure
-                        if mesure is not None:
-                            if mesure != 0:  # Vérification des mesures nulles
-                                mesures[essaie].append(mesure)
-                                print(f"Mesure validée : {mesure} kg")
-                            else:
-                                print("Avertissement : Mesure nulle reçue, vérifiez le capteur.")
-                        else:
-                            print("Erreur : Données reçues non valides.")
-                    time.sleep(1)  # Attente entre deux lectures
+                mesures[essaie] = lancer_essaie()
 
 
 
